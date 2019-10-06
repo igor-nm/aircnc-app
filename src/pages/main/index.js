@@ -1,4 +1,6 @@
 import React from "react";
+import { Alert } from "react-native";
+import websocket from "socket.io-client";
 import { useState, useEffect } from "react";
 import { Container, Image, List } from "./style";
 import SpotList from "./../../components/spot-list";
@@ -13,6 +15,20 @@ import LOGO from "./../../assets/logo.png";
 export default function Main()
 {
     const [techs, setTechs] = useState([]);
+
+    useEffect(() => {
+        database.get(Keys.user).then(user =>
+            {
+                const user_id = user._id;
+                const ws = websocket("http://192.168.0.9:3333", { query: { user_id }});
+
+                ws.on("booking_response", booking =>
+                {
+                    const status = booking.appreved ? "APPROVED" : "REJECTED";
+                    Alert.alert(`Your booking at ${booking.spot.company} on ${booking.date} was ${status}`);
+                })
+            })
+    }, []);
 
     useEffect(() => {
         getTechs();
